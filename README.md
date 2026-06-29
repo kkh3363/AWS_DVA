@@ -5,6 +5,7 @@ AWS Certified Developer - Associate(DVA-C02)
 
 
 ## 프로그램 자료
+- [크롬브라우저](https://www.google.com/intl/ko/chrome/)
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
 
