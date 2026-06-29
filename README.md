@@ -7,3 +7,9 @@ AWS Certified Developer - Associate(DVA-C02)
 ## 프로그램 자료
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
+
+## 사전 지식
+   - 운영체제..리눅스/윈도우 서버
+  - 네트워크 : osi7 , tcp/ip
+  - DB : mysql, oracle, ms-sql
+  - 가상화
