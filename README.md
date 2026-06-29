@@ -8,6 +8,7 @@ AWS Certified Developer - Associate(DVA-C02)
 - [크롬브라우저](https://www.google.com/intl/ko/chrome/)
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [notepad++](https://notepad-plus-plus.org/downloads/v8.9.6.4/)
+- [Mysql Workbench](https://dev.mysql.com/downloads/workbench/)
 - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
 
 ## 사전 지식
