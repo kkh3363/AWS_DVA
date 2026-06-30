@@ -7,7 +7,7 @@ AWS Certified Developer - Associate(DVA-C02)
 ## 프로그램 자료
 - [크롬브라우저](https://www.google.com/intl/ko/chrome/)
 - [Visual Studio Code](https://code.visualstudio.com/)
-- [visual studio c++ 재배포](https://www.ibm.com/links?url=https%3A%2F%2Faka.ms%2Fvs%2F17%2Frelease%2Fvc_redist.x64.exe)
+- [visual studio c++ 재배포](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 - [notepad++](https://notepad-plus-plus.org/downloads/v8.9.6.4/)
 - [Mysql Workbench](https://dev.mysql.com/downloads/workbench/)
 - [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html)
