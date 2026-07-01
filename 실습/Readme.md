@@ -1,2 +1,6 @@
 
 https://www.frontoverflow.com/document/2/%EC%B2%98%EC%9D%8C%20%EB%A7%8C%EB%82%9C%20AWS/chapter/34/%EB%AF%B8%EB%8B%88%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/section/240/%EB%AF%B8%EB%8B%88%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20%EC%86%8C%EA%B0%9C
+
+
+### vpc 실습
+- https://wikidocs.net/269540
