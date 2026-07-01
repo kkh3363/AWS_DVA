@@ -1,0 +1,753 @@
+<html><head><title>13. DynamoDB</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body class="pdf ko-KR" lang="ko-KR"><article id="38c3bb34-61ad-8027-a5b6-d1ceed0a6762" class="page sans"><header><h1 class="page-title" dir="auto">13. DynamoDB</h1><p class="page-description" dir="auto"></p></header><div class="page-body"><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-80b9-8545-e0fd382dc6aa"/></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-8088-ad7d-ca4190ae974e" class="">1. NoSQL</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-801a-8ade-c5899dcf33c5"/></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8039-86aa-e1dfc890dc62" class="bulleted-list"><li style="list-style-type:disc">Non SQL or Non relational</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80d4-bb83-ed0cf3d12d14" class="bulleted-list"><li style="list-style-type:disc">NoSQL 데이터베이스 특징<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80be-806d-fab2925bfc83" class="bulleted-list"><li style="list-style-type:circle">관계형 데이터베이스의 데이터 일관성 제약을 일부 완화</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8088-b691-cff9b50823e5" class="bulleted-list"><li style="list-style-type:circle">수평적으로 확장 가능한 성능</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8047-abad-e80038f76933" class="bulleted-list"><li style="list-style-type:circle">개발 용이성</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ec-9824-fab82cc6c40f" class="bulleted-list"><li style="list-style-type:circle">짧은 지연 시간 및 복원력</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-801b-94f4-d8bd55f8189c" class="bulleted-list"><li style="list-style-type:circle">스키마 없는 데이터 모델에 최적화</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-801c-9a7f-fb7f998aa739" class="bulleted-list"><li style="list-style-type:circle">간단한데이터 구조</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-808d-a9e5-c132ccb49196" class="bulleted-list"><li style="list-style-type:circle">다양한 데이터 모델을 사용<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8005-bc3a-e4aa73c92fe8" class="bulleted-list"><li style="list-style-type:square">열 기반</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80f8-8cc8-deef95b8a2ca" class="bulleted-list"><li style="list-style-type:square">문서 기반</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8069-9373-e24d5d850cbd" class="bulleted-list"><li style="list-style-type:square">그래프</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8001-afc1-c157c55cb6f1" class="bulleted-list"><li style="list-style-type:square">인 메모리 키-값 스토어</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8022-a69d-ca2e69eab92b" class="bulleted-list"><li style="list-style-type:circle">빅데이터, 모바일 및 웹 애플리케이션에 매우 적합</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8085-a0dc-e27af34a9d42" class="">
+</p></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8024-8f21-d3212eb1f36c" class="">RDBMS와 NoSQL 데이터베이스 비교</h3></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-802e-81cf-cd3c630a2c1b" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>RDBMS</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8054-8ca3-e5bc30ab6ff2" class="bulleted-list"><li style="list-style-type:circle">데이터를 유연하게 쿼리할 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807c-985a-f3e61ae4b6fc" class="bulleted-list"><li style="list-style-type:circle">쿼리 비용이 상대적으로 높음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805d-9fe2-ec0a6ef46299" class="bulleted-list"><li style="list-style-type:circle">트래픽이 많은 상황에서는 확장성이 떨어짐</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8021-bd2d-de8e31dca1b0" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>NoSQL 데이터베이스</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8098-a906-cad1f7a4d840" class="bulleted-list"><li style="list-style-type:circle">몇 가지 방법으로 데이터를 효율적으로 쿼리할 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a7-91d1-f62640376973" class="bulleted-list"><li style="list-style-type:circle">그 외에는 쿼리 비용이 높고 속도가 느림</li></ul></div></li></ul></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-80c8-89e7-cb171829c16f" class="image"><img style="width:5120px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/d7610887-c026-4072-b4c5-7eb41c885726/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=4b5a6b4a762abfa32a7ffd42f3b523b862d0a4c38f8b0a82b0a2a77753010405&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8066-9fc7-e9a734d3996e" class="">NoSQL 데이터베이스 유형</h3></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-809b-870d-fb5bc3f83f20" class="bulleted-list"><li style="list-style-type:disc">열 기반 데이터베이스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-804f-b706-dda8a3bc4705" class="bulleted-list"><li style="list-style-type:circle">데이터의 행이 아닌 데이터의 열을 읽고 쓰는 데 최적화</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80db-a925-c0f367ed143d" class="bulleted-list"><li style="list-style-type:disc">문서 데이터베이스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-800b-9893-ed25d148dac7" class="bulleted-list"><li style="list-style-type:circle">JSON 또는 XML 형식의 문서와 같은 반정형 데이터를 저장하도록 설계 됨</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b1-bbb5-cfc5a34bed73" class="bulleted-list"><li style="list-style-type:disc">그래프 데이터베이스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805a-a5db-daefa8ff55e4" class="bulleted-list"><li style="list-style-type:circle">간선이라고 부르는 방향 링크와 정점을 저장</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8054-80cf-fa001833a8d9" class="bulleted-list"><li style="list-style-type:disc">인 메모리 키-값 스토어<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-804e-8266-dead8a7071dc" class="bulleted-list"><li style="list-style-type:circle">인 메모리 캐싱은 핵심 데이터 조각을 메모리에 저장해 액세스 지연 시간을 줄여주므로애플리케이션 성능이 향상 됨</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-804d-8774-cbc0e57231ea" class="">2. DynamoDB</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-8041-b377-c3de8d0b57ad"/></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-806a-afcf-e29f27fb9c20" class="column-list"><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-8013-8298-d848f49b662b" style="width:106.25%" class="column"><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-804b-ba5d-c0c302524b9a" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>완전관리형 클라우드 NoSQL 데이터베이스</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a3-bc02-c601472a9af5" class="bulleted-list"><li style="list-style-type:circle">규모와 관계없이 10ms 미만의 지연 시간 보장</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ab-9acc-d1977e8db266" class="bulleted-list"><li style="list-style-type:circle">유연한 데이터 모델, 용량 제한 없음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8061-b600-e69d9252d869" class="bulleted-list"><li style="list-style-type:circle">안정적인 성능</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80c7-85ed-c89d4f9e2d2f" class="bulleted-list"><li style="list-style-type:circle">처리 용량 자동 조정 기능</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8021-84ef-e3e9793f4b20" class="bulleted-list"><li style="list-style-type:circle">용량과 읽기/쓰기 유닛에 대하여 과금</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8037-bffb-f442e783352b" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>Amazon DynamoDB Accelerator (DAX)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80f6-b88a-f3dbc938300b" class="bulleted-list"><li style="list-style-type:circle">가용성이 뛰어난 완전관리형 인 메모리 캐시</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8018-aaba-d859f00c7cb0" class="bulleted-list"><li style="list-style-type:circle">초당 수백만 개의 요청에도 DynamoDB 응답 시간을밀리초에서 마이크로초로 단축할 수 있음</li></ul></div></li></ul></div></div></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80e8-b3df-e3400a913642" style="width:43.74999999999998%" class="column"><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-80b4-ad28-e9ca69bc18f7" class="image"><img style="width:132px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/7f8ad4af-2024-4f39-8cfc-c193bf1eba73/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=8f75fb3846bcbb454b372ec4aa845dabcac95d28130225206ac59d58e62f707c&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div></div></div></div></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-80a2-adc4-fc9d9a43c07e" class="">DynamoDB Read 방식</h3></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ba-a119-ee06a558c128" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>Eventually Consistent Read</strong></mark>  ⬅︎  <em><mark class="highlight-red">따로 지정하지 않으면 기본으로 사용됨</mark></em><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ee-b69f-d6b313ab2a72" class="bulleted-list"><li style="list-style-type:circle">최근 완료된 쓰기 작업의 결과를 반영하지 않을 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a8-ad7a-e830609b3822" class="bulleted-list"><li style="list-style-type:circle">부실 데이터가 일부 포함될 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8083-b709-c38e1ecc0869" class="bulleted-list"><li style="list-style-type:circle">잠시 후 읽기 요청을 반복하면 응답이 최신 데이터를 반환</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-806c-9706-f85abdca7242" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>Strongly Consistent Read</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8079-b926-c00e7da6e6b2" class="bulleted-list"><li style="list-style-type:circle">성공한 모든 이전 쓰기 작업의 업데이트를 반영하여, 가장 최신 데이터로 응답을 반환</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a6-bbf7-c382c04ea66e" class="bulleted-list"><li style="list-style-type:circle">네트워크 지연 또는 중단이 발생한 경우에 사용이 어려울 수 있음</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8004-8182-df7afc608917" class="">DynamoDB 과금 방식</h3></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ef-a99f-e88d220b0a33" class="bulleted-list"><li style="list-style-type:disc">데이터 스토리지 <div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80bd-9deb-e75b730487c0" class="bulleted-list"><li style="list-style-type:circle">테이블에서 사용한 디스크 공간(GB)당 시간당 요금을 부과</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b8-b2f1-df6bdcaa9dcc" class="bulleted-list"><li style="list-style-type:circle">GB당 월 0.27 USD</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-800a-a4b1-d5425fb3234f" class="bulleted-list"><li style="list-style-type:disc">읽기 용량 유닛<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ab-a139-e89a849fae9a" class="bulleted-list"><li style="list-style-type:circle">1 읽기 용량 유닛 = 초당 최대 2건의 읽기 작업을 제공 (월별 5백 2십만 건)</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-804d-8382-d0c4f77c6edc" class="bulleted-list"><li style="list-style-type:circle">읽기 요청 유닛 100만 건당 0.271 USD</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a0-b488-d1174912d9f9" class="bulleted-list"><li style="list-style-type:disc">쓰기 용량 유닛<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80d1-9114-e452c67b9224" class="bulleted-list"><li style="list-style-type:circle">1 쓰기 용량 유닛 = 초당 최대 1건의 쓰기 작업을 제공 (월별 2백 6십만 건)</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8066-be73-da79ecfdab2c" class="bulleted-list"><li style="list-style-type:circle">쓰기 요청 유닛 100만 건당 1.3556 USD</li></ul></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8070-9fc8-fa26152af855" class=""><a href="https://aws.amazon.com/ko/dynamodb/pricing/">https://aws.amazon.com/ko/dynamodb/pricing/</a></p></div></li></ul></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8040-83bc-f8fbf9c7b9ef" class="">DynamoDB 기본 구성</h3></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80a4-aa98-c2fc69a72e16" class="column-list"><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-8067-8dd9-c2f31b0416b2" style="width:68.75%" class="column"><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80c3-81de-de15b6c81879" class="bulleted-list"><li style="list-style-type:disc">Table<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8088-a780-e598aefd67fb" class="bulleted-list"><li style="list-style-type:circle">Item들의 집합</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b6-8e4c-c8b3f44f28ab" class="bulleted-list"><li style="list-style-type:disc">Item<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80c0-b8a6-c402544bf198" class="bulleted-list"><li style="list-style-type:circle">Attribute들의 집합</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80dd-947f-f2f9577bc5d5" class="bulleted-list"><li style="list-style-type:disc">Attribute<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807c-8345-e80b8321084b" class="bulleted-list"><li style="list-style-type:circle">Key-Value방식의 데이터</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8014-8b0a-dbf405ca0941" class="bulleted-list"><li style="list-style-type:circle">Key는 문자열</li></ul></div></li></ul></div></div></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-8059-ae1a-cfe7e8cd413f" style="width:106.25%" class="column"><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-8026-80f7-d229942b6681" class="image"><img style="width:2164px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/a45fd9f8-386f-4437-be1b-88511f765f46/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=5b44f7514676cc18c879133e4d3cdc014b0123047033933e7cb6c421de99610c&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div></div></div></div></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-801b-919d-eae74247f666" class="">
+</p></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-807a-9e6d-ff094996f5bd" class="">
+</p></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-8051-9d2a-eeb8e10182f1" class="">3. DynamoDB 데이터 타입</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-8096-b846-e2fff329aa31"/></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8092-9ca0-e0f052b25047" class="bulleted-list"><li style="list-style-type:disc">참고 <a href="https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html">ttps://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html</a></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8057-bf90-d0b041e569e1" class="bulleted-list"><li style="list-style-type:disc">DynamoDB 스칼라 데이터 형식 (하나의 값만 표현)<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8094-94a6-d71149f35436" class="bulleted-list"><li style="list-style-type:circle">Number (N) : 양수, 음수 또는 0. 최대 38자리까지 지원.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80fa-a436-d13554735922" class="bulleted-list"><li style="list-style-type:circle">String (S) : UTF-8 이진 인코딩 을 사용하는 유니코드.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8009-a8bf-d4e003aaaea0" class="bulleted-list"><li style="list-style-type:circle">Binary (B) : 압축 텍스트, 암호화 데이터, 또는 이미지 같은 모든 이진수 데이터 저장 가능.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8065-91d4-d0d3817c953f" class="bulleted-list"><li style="list-style-type:circle">Boolean (S, “0” 또는 “1”) : true 또는false 를 저장할 수 있음.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8070-a870-ff95acf74f75" class="bulleted-list"><li style="list-style-type:circle">Null (NULL) : 알려지지 않았거나 정의되지 않은 상태의 속성.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8074-ad1a-f86f971a17c2" class="bulleted-list"><li style="list-style-type:disc">DynamoDB 문서 형식(내포 속성이 있는 복잡한 구조를 표현)<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-808f-9f03-ff5f8d63be42" class="bulleted-list"><li style="list-style-type:circle">List (L) : 순서가 지정된 값 모음을 저장할 수 있음.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805f-aee1-c81607f02733" class="bulleted-list"><li style="list-style-type:circle">Map (M) : 정렬되지 않은 이름-값 쌍의 모음을 저장할 수 있음.</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8025-a83c-c9329a3f0818" class="bulleted-list"><li style="list-style-type:disc">DynamoDB 다중 값 형식<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8020-9b03-c12d6e288016" class="bulleted-list"><li style="list-style-type:circle">다중 값 형식 (여러 스칼라 값을 표현)</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807d-a1f2-ef44f9256db6" class="bulleted-list"><li style="list-style-type:circle">String Set (SS) : 문자열 집합</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8037-8a60-d73d4c0203f8" class="bulleted-list"><li style="list-style-type:circle">Number Set (NS) : 숫자 집합</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8079-8b82-db64a277a52f" class="bulleted-list"><li style="list-style-type:circle">Binary Set (BS) : 이진 집합</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-8009-88f0-d72890b9d7a9" class="">4. DynamoDB 파티션 및 키</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-8024-af3b-c7c1f79ad6f2"/></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8081-8c4d-f3031bdee31f" class="bulleted-list"><li style="list-style-type:disc"><strong>DynamoDB 파티션</strong><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807e-8b7d-c80e569c21d7" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>파티션 (Partition) : </strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80eb-8705-e2f2c3e3dd35" class="bulleted-list"><li style="list-style-type:square"><span style="border-bottom:0.05em solid">DynamoDB가 데이터를 저장하는 곳</span></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805a-8385-f9a59e8bb164" class="bulleted-list"><li style="list-style-type:square">SSD(Solid State Drive)로 백업되는 테이블용 스토리지 할당</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80f2-b7bc-fb76f03fbec9" class="bulleted-list"><li style="list-style-type:square">하나의 AWS 리전 내의 여러 가용 영역에 자동으로 복제됨</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80cc-b770-d70da7940693" class="bulleted-list"><li style="list-style-type:square">직접 관리할 필요 없이 파티션 관리는 전적으로 DynamoDB에서 처리 함</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80fa-9e11-c4787da34dd0" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>다음과 같은 상황에 테이블에 추가 파티션을 할당</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8051-8463-d58add8af881" class="bulleted-list"><li style="list-style-type:square">기존 파티션이 지원할 수 있는 <strong>한도를 초과</strong>하여, 테이블의 할당된 처리량 설정을 늘리는경우</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8043-971f-efe471c8b932" class="bulleted-list"><li style="list-style-type:square">기존 파티션 용량이 다 차서 <strong>추가 스토리지 공간이 필요</strong>한 경우</li></ul></div></li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80cf-a8df-d5c6e0a4d88d" class="bulleted-list"><li style="list-style-type:disc"><strong>DynamoDB 키</strong><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8055-9a95-f68a6e4971fa" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>기본 키 (Primary Key)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-806e-b0a8-e90a94b22961" class="bulleted-list"><li style="list-style-type:square">Table내에서 각 Item을 구분하는 고유 식별자</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807f-b69f-eba93f568615" class="bulleted-list"><li style="list-style-type:square">단순 기본 키: 파티션 키만 사용</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-809f-9771-cdc771de4ea4" class="bulleted-list"><li style="list-style-type:square">복합 기본 키: 파티션 키와 정렬 키를 함께 사용</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80bf-b8dd-e863c344242e" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>파티션 키 (Partition Key)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8039-9f67-f773d718f390" class="bulleted-list"><li style="list-style-type:square">내부 해시 함수에 대한 입력으로 파티션 키 값을 사용</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8015-bb61-f83d80d325ea" class="bulleted-list"><li style="list-style-type:square">출력에 따라 항목을 저장할 파티션이 결정됨</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8039-8b32-ddabf1b5915f" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>정렬 키 (Sort Key)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805b-bcb8-f3972afc8183" class="bulleted-list"><li style="list-style-type:square">파티션 키가 동일한 모든 항목들을 정렬하는 키 값</li></ul></div></li></ul></div></li></ul></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-8008-a84b-c9f045242475" class="image"><img style="width:576px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/502d9f62-9848-4fe1-95b4-02eb72f28f8f/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=f9c52d052108a56b8a15f4083f1e6db02d3b7da334249c50b22b83c92df01b06&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80c1-861b-f89b130deca6" class="bulleted-list"><li style="list-style-type:disc">Name을 파티션 키로 사용, 파티션 키를 통해서 Item을 찾을 수 있습니다.</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80fa-8f4d-cab011e2d0aa" class="bulleted-list"><li style="list-style-type:disc">기본 키로 파티션 키와 정렬 키를 함께 사용</li></ul></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-80da-9401-c34b6020de99" class="image"><img style="width:480px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/7994863b-1598-4a4a-a27f-c86ce8004655/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=eb9c7b4e5ce471f6ac3971b900d5a702c18e5887386bfc5c4fdf5ebfd86bf23a&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8025-b0b9-cc53ae7dc93d" class="">
+</p></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8092-ba26-fa1f8705fdbd" class="bulleted-list"><li style="list-style-type:disc">먼저 파티션 키를 해시 함수의 입력으로 전달하여 Item이 저장되어 있는 파티션을 찾고, 이후에 해당 파티션 내에서 정렬 키를 사용하여 Item을 찾게 됩니다</li></ul></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-80cb-9b3d-def5a47123ca" class="">5. DynamoDB 보조 인덱스</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-80a3-8472-fef3d8ab65eb"/></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80dc-8ac9-d0acadccdea3" class="bulleted-list"><li style="list-style-type:disc">하나 이상의 보조 인덱스를 생성할 수 있음, 보조 인덱스는 파티션 키에 대한 쿼리는 물론이고, 정렬 키를 사용하여 테이블 데이터에 대한 쿼리까지 실행</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80dd-aab0-c5d44735de4a" class="bulleted-list"><li style="list-style-type:disc">DynamoDB 보조 인덱스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ee-bccc-deac3745fbe9" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>로컬 보조 인덱스 (Local Secondary Index, LSI)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ae-86c0-e5ceb78faef0" class="bulleted-list"><li style="list-style-type:square">테이블과 파티션 키는 동일하지만 정렬 키는 다른 인덱스</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8031-a062-f313830794ef" class="bulleted-list"><li style="list-style-type:square">정렬 키(Sort Key)를 추가로 더 만든다고 생각하면 됨!</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807f-bf3c-eb6c8bc75242" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>글로벌 보조 인덱스 (Global Secondary Index, GSI)</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80d7-9a00-f4f38648a6e3" class="bulleted-list"><li style="list-style-type:square">파티션 키 및 정렬 키가 테이블의 파티션 키 및 정렬 키와 다를 수 있는 인덱스</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8024-8169-df27188be701" class="bulleted-list"><li style="list-style-type:circle"><mark class="highlight-pink"><strong>보조 인덱스 개수 제한</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a7-ac55-c9d1604c205e" class="bulleted-list"><li style="list-style-type:square">테이블당 최대 20개의 GSI 및 5개의 LSI를 정의할 수 있음 (일부 리전 제외)</li></ul></div></li></ul></div></li></ul></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-8089-91ee-d98e30c7dac5" class="image"><img style="width:5120px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/69bb40ff-9999-4d55-be5e-de61d1b6d68c/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=b39d873f3eea013d4bcee796c12d5579ccb03def23d50213675aa1cc90a7c5d3&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8068-92b3-e404623453c1" class="">
+</p></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8052-8da6-cd2dcdac2a0e" class="">
+</p></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-807d-bbf7-f19f645a1827" class="image"><img style="width:3640px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/8b7f39a2-886f-44a9-b8b7-2671473f59cf/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=a3079cd1632e945f35787e120560173255df57bf20db949dbad6bdd2107b6bba&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8018-9588-e7b16dab055d" class="bulleted-list"><li style="list-style-type:disc"> 테이블의 파티션 키는 Name이고 정렬 키는 Subject입니다</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-804b-af80-fbbf96c6741d" class="bulleted-list"><li style="list-style-type:disc">로컬 보조 인덱스는 테이블과 파티션 키는 동일하지만 정렬 키는 다른 인덱스</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-807f-87fa-f8c2fdea1685" class="bulleted-list"><li style="list-style-type:disc">로컬 보조 인덱스의 파티션 키는 Name으로 테이블과 동일하며, 정렬 키는 Score로 테이블과 다른 </li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-808b-9967-d629f08784bc" class="bulleted-list"><li style="list-style-type:disc">로컬 보조 인덱스를 만들어서 사용하게 되면 → Name과 Score 값을 이용해서 테이블 내에서 아이템을 찾을 수 있음</li></ul></div><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-8010-8e9e-e86a4123b60b" class="image"><img style="width:3696px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/4ae7ed78-79be-418b-87bf-3e44d1cff7ef/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=8260a9c814598561fd7254ab4d08dc548f2ef3c159e2223c8e67e59009ee3865&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8023-b70c-e51b1762c4ca" class="bulleted-list"><li style="list-style-type:disc">파티션 키 및 정렬 키가 테이블의 파티션 키 및 정렬 키와 다를 수 있는 인덱스</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a6-ad94-d20b9b24b684" class="bulleted-list"><li style="list-style-type:disc">글로벌 보조 인덱스의 파티션 키는 Subject가 되고, 정렬 키는 Name</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8041-87b1-edc0de3fda67" class="bulleted-list"><li style="list-style-type:disc">다른 값으로 파티션을 나눌 수 있고, 해당 파티션 내에서 아이템들을 정렬 할수 있음.</li></ul></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-805d-a033-c2a6f9494cd6" class="">
+</p></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-80de-8e2d-d3b18bf71f91" class="">6. DynamoDB 데이터 조회</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-8073-8abc-c0d7b3004889"/></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-809a-908e-f335892bd3be" class="bulleted-list"><li style="list-style-type:disc"><a href="https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/Query.html">https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/Query.html</a></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-800f-9133-e88571a61d56" class="bulleted-list"><li style="list-style-type:disc"><a href="https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/Scan.html">https://docs.aws.amazon.com/ko_kr/amazondynamodb/latest/developerguide/Scan.html</a></li></ul></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-802b-808f-f48317ccdf09" class="">
+</p></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8053-965c-e2532c918b31" class="bulleted-list"><li style="list-style-type:disc">DynamoDB의 데이터 조회 방식에는 크게 <strong>Query</strong>와 <strong>Scan</strong></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8046-8612-c37cfb3aa684" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>DynamoDB Query</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ae-aa51-caffad48ce6e" class="bulleted-list"><li style="list-style-type:circle">기본 키 값을 기반으로 항목을 찾음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8005-9d50-ed78c38792c5" class="bulleted-list"><li style="list-style-type:circle">복합 기본 키(파티션 키 및 정렬 키)가 있는 테이블 또는 보조 인덱스를 쿼리할 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8017-a604-db7fee047ad7" class="bulleted-list"><li style="list-style-type:circle">파티션 키 속성의 이름과 해당 속성의 단일 값을 제공해야 함</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8032-893b-d63daf352fa6" class="bulleted-list"><li style="list-style-type:circle">해당 파티션 키 값을 갖는 모든 항목을 반환</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-806c-a57b-c74d0667cff8" class="bulleted-list"><li style="list-style-type:circle">선택적으로 정렬 키 속성을 제공하고, 비교 연산자를 사용하여 검색 결과의 범위를 좁힐 수있음</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-803e-85b8-eff899917312" class="bulleted-list"><li style="list-style-type:disc"><mark class="highlight-pink"><strong>DynamoDB Scan</strong></mark><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8034-bea6-eda64eed6ed5" class="bulleted-list"><li style="list-style-type:circle">테이블 또는 보조 인덱스의 모든 항목을 읽어옴</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b1-8314-edb64a952ba1" class="bulleted-list"><li style="list-style-type:circle">기본적으로 테이블이나 인덱스에 속한 항목의 데이터 속성을 모두 반환</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8076-a369-e3bb8a28eb51" class="bulleted-list"><li style="list-style-type:circle">ProjectionExpression 파라미터를 사용하면 일부 속성만 가져올 수 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-806f-a9da-c301905095e5" class="bulleted-list"><li style="list-style-type:circle">Scan은 항상 결과 집합을 반환함<br/>(일치하는 항목이 없다면 비어있는 결과 집합이 반환 됨)</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805a-bb1d-efed3ffed859" class="bulleted-list"><li style="list-style-type:circle">단일 Scan 요청은 최대 1 MB까지 데이터를 가져올 수 있음<br/>(옵션으로 필터 표현식을 적용하면 반환되는 결과의 범위를 좁힐 수 있음)</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><blockquote id="38c3bb34-61ad-8090-bd0c-d6e36d0e0ad6" class=""><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8066-9782-eb65365f0c6a" class=""><em><strong>Query (키 값으로 찾는 것) : 학번으로 곧바로 부르는 것<br/>vs<br/>Scan (전체 데이터를 가져와서 필터링 하는 것) : 한 명씩 불러서 학번이 일치하는지 확인</strong></em></p></div></blockquote></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80c8-9463-e525bcd8a53b" class="bulleted-list"><li style="list-style-type:disc">Scan은 속도도 느리고 비싸므로 웬만하면 사용하지 않는 것이 좋음</li></ul></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-809b-b8aa-e4fbf2ba56dc" class="">
+</p></div><div style="display:contents" dir="auto"><h2 id="38c3bb34-61ad-80fd-829d-eeab0fb42b6b" class="">7. 실습</h2></div><div style="display:contents" dir="auto"><hr id="38c3bb34-61ad-8087-ba61-d4259ab1d4c5"/></div><div style="display:contents" dir="auto"><p id="38c3bb34-61ad-8069-9c8b-e82d965ddaeb" class="">
+</p></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8071-9190-cb19956433a9" class="">DynamoDB 테이블 설계</h3></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80bb-8dc7-c52e9ba7961a" class="bulleted-list"><li style="list-style-type:disc">어떻게 설계할지 생각해보기<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8062-b137-c03ec3c53aab" class="bulleted-list"><li style="list-style-type:circle">전교생의 시험 점수를 DynamoDB에 넣어서 관리하려고 함</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8014-a8f9-d0abeceb62f7" class="bulleted-list"><li style="list-style-type:circle">학생들은 저마다 고유의 학번을 갖고 있음</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8063-bbdf-df0739ba7cd7" class="bulleted-list"><li style="list-style-type:circle">시험 과목은 영어, 과학, 수학 총 3과목</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80a8-8040-d11996a68d8b" class="bulleted-list"><li style="list-style-type:circle">아래와 같은 데이터 조회가 가능해야 함<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8022-95ec-ea93717965c6" class="bulleted-list"><li style="list-style-type:square">한 학생의 영어, 과학, 수학 점수를 다 가져오기</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8017-9938-db893d4497a2" class="bulleted-list"><li style="list-style-type:square">각 과목별 점수로 정렬하여 학생 목록 가져오기</li></ul></div></li></ul></div></li></ul></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-8097-b5d4-f01ecedb966b" class="column-list"><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80a1-8287-e485abbc03d9" style="width:125%" class="column"><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8078-a295-f8546293f388" class="bulleted-list"><li style="list-style-type:disc">기본 키를 어떻게 구성해야 할까?<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-800a-aa63-e2541bbcc651" class="bulleted-list"><li style="list-style-type:circle">기본 키 (Primary Key)<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80ca-9720-fc909172db85" class="bulleted-list"><li style="list-style-type:square">단순 기본 키로 할 경우<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b6-bfd2-ef1720406566" class="bulleted-list"><li style="list-style-type:disc">파티션 키: 학생의 학번</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8099-868c-c163a0bec126" class="bulleted-list"><li style="list-style-type:square">복합 기본 키로 할 경우<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-803a-99eb-da65518d6b4c" class="bulleted-list"><li style="list-style-type:disc">파티션 키: 학생의 학번</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805a-988a-f41b4599b13b" class="bulleted-list"><li style="list-style-type:disc">정렬 키: 과목명</li></ul></div></li></ul></div></li></ul></div></li></ul></div></div></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80a0-9ca2-c4674d1d0a97" style="width:75%" class="column"><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-8065-b6ac-d9b5710e7047" class="image"><img style="width:1648px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/1605b318-7051-4c69-8d3c-ef577fa29277/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=bbc338dee6967512ac8815038aeadf08fe7aba04762076114fa002fc346cbfb3&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div></div></div></div></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-8025-8ed2-d07ecce8c3d7" class="column-list"><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80ca-abf3-fce1404da2aa" style="width:118.75%" class="column"><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-809c-a816-e16fac9a0add" class="bulleted-list"><li style="list-style-type:disc">보조 인덱스 추가하기<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8099-b40a-e7cfc4ab61e8" class="bulleted-list"><li style="list-style-type:circle">로컬 보조 인덱스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8005-b4b3-cd78f5fafd39" class="bulleted-list"><li style="list-style-type:square">여기서는 굳이 필요 없음</li></ul></div></li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-805f-9626-d66858e3511f" class="bulleted-list"><li style="list-style-type:circle">글로벌 보조 인덱스<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80b8-a6c1-fb3df144d63e" class="bulleted-list"><li style="list-style-type:square">복합 기본 키<div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-8074-9cbe-df703392e450" class="bulleted-list"><li style="list-style-type:disc">파티션 키: 과목명</li></ul></div><div style="display:contents" dir="auto"><ul id="38c3bb34-61ad-80f1-824e-e9dcf6bd3244" class="bulleted-list"><li style="list-style-type:disc">정렬 키: 점수</li></ul></div></li></ul></div></li></ul></div></li></ul></div></div></div><div style="display:contents" dir="auto"><div id="38c3bb34-61ad-80e5-88db-d81006e7866b" style="width:81.25000000000001%" class="column"><div style="display:contents" dir="ltr"><figure id="38c3bb34-61ad-80dd-9c12-d9769977363d" class="image"><img style="width:3296px" src="https://prod-files-secure.s3.us-west-2.amazonaws.com/8743bb34-61ad-813e-a746-000390a09a4b/d37a9244-d234-436a-9f81-0bc557dea09f/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=ASIAZI2LB466UFPABK7E%2F20260630%2Fus-west-2%2Fs3%2Faws4_request&amp;X-Amz-Date=20260630T235554Z&amp;X-Amz-Expires=21600&amp;X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJIMEYCIQDMK5owQdpiT8Qq5iSgeNxJDWd4rU6dq5%2BcQIJXI6uC1wIhAOoa8HQG%2F9JQkPfC%2Ff1zMghVG37cAYIQUqptMLIgaZbmKogECM7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjM3NDIzMTgzODA1Igyssu5ee5RE0ptIhLsq3AMOONehfBgYVd0y2YqYFoVM02aGQpuJ5XzfK4sNuKefq8KDT7J2t%2BqLHQV1PxV9vkdcg3KWLq51NzKtxtlIb6t6hdPmQARUWS3iZOHV8JiE7IZlBArw%2BwSu8XfWoZJXw2ijKVl3Sj8GEzIfpfRi%2F9kbKXccMKRd3fAwjr%2B7QmSk64c0EPYbpHiuCARzabHcNelapA5%2F4401%2BdLXNfLV1J6eL0v7AxPVwSp6BIx2yVoqlMyFNagJSEn%2BJp1utIabklG2MgfV6CKue0DfM7kGC0p%2Bek75p7%2FrHV1mIQYusGi9jkuDrKqTv0m6vEtX7LpXnkobn8TAj2dFyIkv2YrwG8va%2BkS9vv5z%2BbXCgIlGxrqjXl4M46Y7aYJDfOzs%2F6KRATbfk1QtpskAFQkd%2FlZ9YP9mewCDWEJoVjFJQbsTLiQ8P7wR025M4wJEjk0HckTYZKrxY2wh879h%2BWH01X7cQVMBtgwv1Brts28MMJbv%2BJXlv%2Fa87pPJid6T1mOJMxyL2pXT4sZ04zy2kJhcddYnq1OF0NrvSZcoZx%2FTu9f7RRsqqCAM17JxF%2BiJ9YAifIWJZhQwHQ3Fwd7qoP7xeXt7wNKX3rdK7YPRMe%2BegDndgJgxqALAQcXRIwE%2FgAzX1zDQ6JDSBjqkAf4EL73981AnB5o8TXIRoF36dI6P8BfOjBGBSICn9y0w8Vftna5UGHI3zmU1oDfZDzejfg37yJgT2%2BzaWzZpOWtA87bAlaTvQ%2B7%2Br7Ez4T9MwvhDrgUfdUfUZPP1PgzMFgaW1DVbcA1oPDVFPAoiSHoi%2BtYq9hBB%2FaMD%2BjGCCwuJNpNk6kyZacjgZ%2BUjhIajsr5paDNSl1Bm8ItMGe1w4tAyAXOd&amp;X-Amz-Signature=edcc7bb3a85194b20103e1f1686d208e71b831deaa1341ac557b5fd746208495&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject"/></figure></div></div></div></div></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-80f8-8b78-ca6489cebb77" class="">DynamoDB 데이터 생성</h3></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-80fb-9cfd-cdc11a9a36be" class="">DynamoDB 데이터 입력</h3></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-8064-9f52-df3f03b1bc96" class="">DynamoDB 데이터 조회</h3></div><div style="display:contents" dir="auto"><h3 id="38c3bb34-61ad-80fe-a39e-d88c255820a4" class="">DynamoDB 테이블 삭제</h3></div></div></article></body></html>
