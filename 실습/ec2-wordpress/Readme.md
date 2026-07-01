@@ -5,8 +5,8 @@ sudo -i
 # dnf update
 
 dnf install -y wget php-mysqlnd httpd php-fpm php-mysqli
-dnf install -y mariadb118-server php-json php php-devel
-
+dnf install -y  php-json php php-devel
+*** mariadb118-server
 wget https://wordpress.org/latest.tar.gz
 
 wget https://wordpress.org/latest.tar.gz
