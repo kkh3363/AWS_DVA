@@ -9,8 +9,6 @@ dnf install -y  php-json php php-devel
 *** mariadb118-server
 wget https://wordpress.org/latest.tar.gz
 
-wget https://wordpress.org/latest.tar.gz
-
 systemctl enable mariadb httpd
 systemctl start mariadb httpd
 
