@@ -18,7 +18,7 @@ cp -r ~/wordpress/* /var/www/html/
 ## http.conf 수정
 vim /etc/httpd/conf/httpd.conf
 ### <Directory "/var/www/html">
-### AllowOverride All
+### AllowOverride None --> ALL
 
 chown -R apache.apache /var/www
 chmod 2775 /var/www
@@ -27,30 +27,14 @@ cp wp-config-sample.php wp-config.php
 ls wp-config*
 
 vim wp-config.php
-```
+
 find /var/www -type d -exec sudo chmod 2775 {} \;
 
 find /var/www -type f -exec sudo chmod 0644 {} \;
 
 systemctl enable  httpd
 systemctl start  httpd
-
-mysql_secure_installation
---- db -----
-create user 'wpuser@localhost' identified by '4321';
-create database wp-db;
-grant all privileges on wp_db.* to 'wpuser@localhost';
---- db 끝-----
-
-## cp -r ~/wordpress/* /var/www/html/
-
-vim /etc/httpd/conf/httpd.conf
-
-## AllowOverride None --> ALL
-
-
-
-
+```
 
 -----------------
 
@@ -69,8 +53,13 @@ mysql_secure_installation
 mysql -u root -p
 --- db -----
 create user 'wpuser'@'localhost' identified by '4321';
-create database wp-db;
-grant all privileges on wp_db.* to 'wpuser'@'localhost';
+create database wpdb;
+grant all privileges on wpdb.* to 'wpuser'@'localhost';
 --- db 끝-----
+
+cd /var/www/html
+
+vim wp-config.php
+```
 
 
