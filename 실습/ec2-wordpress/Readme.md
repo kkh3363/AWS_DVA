@@ -1,5 +1,9 @@
 
 ```
+sudo -i
+
+# dnf update
+
 dnf install -y wget php-mysqlnd httpd php-fpm php-mysqli
 dnf install -y mariadb118-server php-json php php-devel
 
