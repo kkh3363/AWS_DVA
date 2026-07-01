@@ -12,7 +12,10 @@ wget https://wordpress.org/latest.tar.gz
 tar -xfv latest.tar.gz
 cp -r ~/wordpress/* /var/www/html/
 
-
+## http.conf 수정
+vim /etc/httpd/conf/httpd.conf
+### <Directory "/var/www/html">
+### AllowOverride All
 systemctl enable  httpd
 systemctl start  httpd
 
