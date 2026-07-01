@@ -9,8 +9,12 @@ dnf install -y  php-json php php-devel
 *** mariadb118-server
 wget https://wordpress.org/latest.tar.gz
 
-systemctl enable mariadb httpd
-systemctl start mariadb httpd
+tar -xfv latest.tar.gz
+cp -r ~/wordpress/* /var/www/html/
+
+
+systemctl enable  httpd
+systemctl start  httpd
 
 mysql_secure_installation
 --- db -----
@@ -36,7 +40,14 @@ dnf install php-gd
 chown -R apache.apache /var/www
 chmod 2775 /var/www
 
+-----------------
+
+
 find /var/www -type d -exec sudo chmod 2775 {} \;
 
 find /var/www -type f -exec sudo chmod 0644 {} \;
 ```
+dnf install -y mariadb118-server
+
+systemctl enable mariadb httpd
+
